@@ -81,13 +81,17 @@
         
            <li> 
             {{ pass.name + " " + pass.destination + " (" + str(int(((now() - pass.approved_datetime).total_seconds())//60)) + " mins)" }} 
-            
+           </br>
             <form class="form-inline" action="/return_pass/{{pass.id}}">
                 <button class="btn btn-sm btn-outline-secondary">Back</a> 
             </form>
 
             <form class="form-inline" action="/approve_pass/{{pass.id}}">
                 <button class="btn btn-sm btn-outline-secondary">Reprint</a> 
+            </form>
+
+            <form class="form-inline" action="/view_pass/{{pass.id}}">
+                <button class="btn btn-sm btn-outline-secondary">View</a> 
             </form>
            
             </li>

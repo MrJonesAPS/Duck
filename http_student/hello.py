@@ -71,6 +71,13 @@ def request_pass():
         flash("Hi " + name + " your pass for " + destination + " has been created. You can now ask Mr Jones to approve it")
         return redirect(url_for("home"))    
 
+@app.route("/view_pass/<id>", methods=["GET"])
+def view_pass(id):
+    thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one()
+    thisPass.back_datetime = datetime.now()
+    db.session.commit()
+    return render_template("view_pass.html", name=thisPass.name, destination=thisPass.destination) 
+
 @app.route("/request_wp", methods=["GET","POST"])
 def request_wp():
     if request.method == "GET":

@@ -20,6 +20,7 @@ from flask_login import (
 )
 from oauthlib.oauth2 import WebApplicationClient
 import requests
+from escpos.printer import Serial
 
 #configuration
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -58,13 +59,23 @@ def initializePrinter():
     printer.feed(2)
     return printer
 
+def initializePrinter_escpos():
+    p = Serial(devfile='/dev/serial0',
+           baudrate=19200,
+           bytesize=8,
+           parity='N',
+           stopbits=1,
+           timeout=1.00,
+           dsrdtr=True)
+    return p
+
 def checkPaper():
     if printer.has_paper():
         pass
     else:
         flash("The printer is out of paper. Tell Mr. Jones to fix it!","error")
 
-def PrintHallPass(name, destination, date, time):
+def PrintHallPass(name, destination, date, time, id):
     printer.size = adafruit_thermal_printer.SIZE_MEDIUM
     printer.justify = adafruit_thermal_printer.JUSTIFY_CENTER
     printer.print("__(.)<   THIS IS A   <(.)__")
@@ -77,6 +88,11 @@ def PrintHallPass(name, destination, date, time):
     printer.feed(1)
     printer.print("Questions? See Mr. Jones")
     printer.print("in room B130")
+    printer.feed(1)
+    printer.size = adafruit_thermal_printer.SIZE_SMALL
+    printer.print("(scan to validate)")
+    printer_escpos.qr("http://10.39.13.236/view_pass/" + str(id),native=False ,size=8)
+    
     printer.feed(2)
 
 def PrintWPPass(name, date):
@@ -265,7 +281,7 @@ def approve_pass(id):
     db.session.commit()
     nowTime = datetime.now().strftime("%I:%M %p")
     nowDate = date.today().strftime("%B %d, %Y")
-    PrintHallPass(thisPass.name, thisPass.destination, nowDate, nowTime)
+    PrintHallPass(thisPass.name, thisPass.destination, nowDate, nowTime, id)
     return redirect(url_for("pass_admin"))  
 
 @app.route("/reject_pass/<id>", methods=["GET"])
@@ -306,6 +322,13 @@ def return_pass(id):
     thisPass.back_datetime = datetime.now()
     db.session.commit()
     return redirect(url_for("pass_admin"))  
+
+@app.route("/view_pass/<id>", methods=["GET"])
+def view_pass(id):
+    thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one()
+    thisPass.back_datetime = datetime.now()
+    db.session.commit()
+    return render_template("view_pass.html", name=thisPass.name, destination=thisPass.destination) 
 
 @app.route("/request_pass", methods=["GET","POST"])
 def request_pass():
@@ -395,6 +418,7 @@ def summary():
 #Initialize Printer
 ###
 printer = initializePrinter()
+printer_escpos = initializePrinter_escpos()
 
 db = SQLAlchemy(app)
 
