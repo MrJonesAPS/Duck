@@ -92,8 +92,7 @@ def PrintHallPass(name, destination, date, time, id):
     printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.print("(scan to validate)")
     printer_escpos.qr("http://10.39.13.236/view_pass/" + str(id),native=False ,size=8)
-    
-    printer.feed(2)
+    printer_escpos.text("\n\n\n")
 
 def PrintWPPass(name, date):
     ###
@@ -325,10 +324,35 @@ def return_pass(id):
 
 @app.route("/view_pass/<id>", methods=["GET"])
 def view_pass(id):
-    thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one()
-    thisPass.back_datetime = datetime.now()
-    db.session.commit()
-    return render_template("view_pass.html", name=thisPass.name, destination=thisPass.destination) 
+    
+    
+    thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one_or_none()
+    
+    if thisPass is None or thisPass.approved_datetime is None:
+        passStatus = "notvalid"
+        destination = None
+        approved_date = None
+        name = None
+
+    elif(thisPass.approved_datetime is not None 
+        and thisPass.back_datetime is None):
+        passStatus = "valid"
+        destination=thisPass.destination
+        approved_date=thisPass.approved_datetime
+        name=thisPass.name
+
+    elif(thisPass.approved_datetime is not None 
+        and thisPass.back_datetime is not None):
+        passStatus = "returned"
+        destination=thisPass.destination
+        approved_date=thisPass.approved_datetime
+        name=thisPass.name
+
+    return render_template("view_pass.html", 
+            name=name, 
+            destination=destination, 
+            approved_date=approved_date,
+            passStatus = passStatus) 
 
 @app.route("/request_pass", methods=["GET","POST"])
 def request_pass():

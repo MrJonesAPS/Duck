@@ -73,10 +73,35 @@ def request_pass():
 
 @app.route("/view_pass/<id>", methods=["GET"])
 def view_pass(id):
-    thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one()
-    thisPass.back_datetime = datetime.now()
-    db.session.commit()
-    return render_template("view_pass.html", name=thisPass.name, destination=thisPass.destination) 
+    
+    
+    thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one_or_none()
+    
+    if thisPass is None or thisPass.approved_datetime is None:
+        passStatus = "notvalid"
+        destination = None
+        approved_date = None
+        name = None
+
+    elif(thisPass.approved_datetime is not None 
+        and thisPass.back_datetime is None):
+        passStatus = "valid"
+        destination=thisPass.destination
+        approved_date=thisPass.approved_datetime
+        name=thisPass.name
+
+    elif(thisPass.approved_datetime is not None 
+        and thisPass.back_datetime is not None):
+        passStatus = "returned"
+        destination=thisPass.destination
+        approved_date=thisPass.approved_datetime
+        name=thisPass.name
+
+    return render_template("view_pass.html", 
+            name=name, 
+            destination=destination, 
+            approved_date=approved_date,
+            passStatus = passStatus) 
 
 @app.route("/request_wp", methods=["GET","POST"])
 def request_wp():
