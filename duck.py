@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 import json
 import os
 import sqlite3
@@ -5,10 +8,8 @@ import sqlite3
 from datetime import date, datetime, timedelta
 from flask import Flask, redirect, url_for, render_template, request, flash
 from flask_sqlalchemy import SQLAlchemy
-#import board
-#import busio
-#import adafruit_thermal_printer
-#import serial
+from flask_socketio import SocketIO
+from flask_socketio import send, emit
 
 from flask_login import (
     LoginManager,
@@ -20,7 +21,6 @@ from flask_login import (
 )
 from oauthlib.oauth2 import WebApplicationClient
 import requests
-#from escpos.printer import Serial
 
 #configuration
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -36,9 +36,7 @@ app.config.from_pyfile('instance/config.py')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "home"
-#I don't need to flash a message if logged out because I always just redirect to login
 login_manager.login_message = "You are not logged in"
-
 
 # OAuth 2 client setup
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
@@ -51,13 +49,6 @@ def load_user(user_id):
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-@app.before_request
-def before_request():
-    if not request.is_secure:
-        url = request.url.replace('http://', 'https://', 1)
-        code = 301
-        return redirect(url, code=code)
-
 @app.route("/login")
 def login():
     # Find out what URL to hit for Google login
@@ -68,7 +59,7 @@ def login():
     # scopes that let you retrieve user's profile from Google
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
-        redirect_uri=request.base_url + "/callback",
+        redirect_uri="https://www.duck.whscs.net/login/callback",
         scope=["openid", "email", "profile"],
     )
     return redirect(request_uri)
@@ -82,12 +73,14 @@ def callback():
     # things on behalf of a user
     google_provider_cfg = get_google_provider_cfg()
     token_endpoint = google_provider_cfg["token_endpoint"]
-
     # Prepare and send a request to get tokens! Yay tokens!
+    #For some reason, these request parameters were coming as http instead of https,
+    #which was causing OAuth to throw errors.
+    #I never figured out why, but this simple replace fixes it.
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
-        authorization_response=request.url,
-        redirect_url=request.base_url,
+        authorization_response=request.url.replace("http:", "https:"),
+        redirect_url=request.base_url.replace("http:", "https:"),
         code=code
     )
     token_response = requests.post(
@@ -96,7 +89,7 @@ def callback():
         data=body,
         auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
     )
-        
+       
     # Parse the tokens!
     client.parse_request_body_response(json.dumps(token_response.json()))
 
@@ -113,7 +106,6 @@ def callback():
     if userinfo_response.json().get("email_verified"):
         unique_id = userinfo_response.json()["sub"]
         users_name = userinfo_response.json()["given_name"]
-        #return "userid: " + unique_id,400
     else:
         return "User email not available or not verified by Google.", 400
 
@@ -201,7 +193,7 @@ def approve_pass(id):
     db.session.commit()
     nowTime = datetime.now().strftime("%I:%M %p")
     nowDate = date.today().strftime("%B %d, %Y")
-    #PrintHallPass(thisPass.name, thisPass.destination, nowDate, nowTime, id)
+    socketio.emit('Pass', {'name': thisPass.name, 'destination': thisPass.destination})
     return redirect(url_for("pass_admin"))  
 
 @app.route("/reject_pass/<id>", methods=["GET"])
@@ -216,12 +208,23 @@ def reject_pass(id):
 @app.route("/approve_wp/<id>", methods=["GET"])
 @login_required
 def approve_wp(id):
+    ###
+    #I got some of this code from stackoverflow
+    #https://stackoverflow.com/questions/5891555/display-the-date-like-may-5th-using-pythons-strftime
+    ###
+    def suffix(d):
+        return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+    def custom_strftime(format, t):
+        return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+
     print("approving WP",id)
     thisPass = db.session.execute(db.select(WPPass).filter_by(id=id)).scalar_one()
     print(thisPass)
     thisPass.approved_datetime = datetime.now()
     db.session.commit()
-    #PrintWPPass(thisPass.name, thisPass.date)
+
+    socketio.emit('WP', {'name': thisPass.name, 'date': custom_strftime('%a, %B {S}',thisPass.date)})
     return redirect(url_for("pass_admin"))  
 
 @app.route("/reject_wp/<id>", methods=["GET"])
@@ -230,7 +233,7 @@ def reject_wp(id):
     print("rejecting WP",id)
     thisPass = db.session.execute(db.select(WPPass).filter_by(id=id)).scalar_one()
     print(thisPass)
-    thisPass.rejected = True #Why doesn't this work???
+    thisPass.rejected = True
     db.session.commit()
     return redirect(url_for("pass_admin"))  
 
@@ -277,7 +280,6 @@ def view_pass(id):
 @app.route("/request_pass", methods=["GET","POST"])
 def request_pass():
     if request.method == "GET":
-        #checkPaper()
         return render_template("request_pass.html")
     elif request.method == "POST":
         name = request.form.get("name")
@@ -308,7 +310,6 @@ def admin_request_pass():
 @app.route("/request_wp", methods=["GET","POST"])
 def request_wp():
     if request.method == "GET":
-        #checkPaper()
         return render_template("request_wp.html")
     elif request.method == "POST":
         name = request.form.get("name")
@@ -360,7 +361,7 @@ def resetdb():
 
 
 ###
-#Initialize Printer
+#DATABASE STUFF
 ###
 
 db = SQLAlchemy(app)
@@ -395,5 +396,14 @@ class User(db.Model, UserMixin):
     id = db.Column(db.String(100), primary_key=True)
     name = db.Column(db.String(100))
 
+#########
+#Socket Stuff
+#########
+socketio = SocketIO(app, async_mode='gevent', engineio_logger=True, logger=True, cors_allowed_origins=['https://www.whscs.net','https://whscs.net'])
+
+@socketio.on('connect')
+def test_connect():
+    send('after connect')
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    socketio.run(app)
