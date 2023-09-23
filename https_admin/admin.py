@@ -52,7 +52,10 @@ def load_user(user_id):
 def initializePrinter():
     ThermalPrinter = adafruit_thermal_printer.get_printer_class(2.68)
     uart = serial.Serial("/dev/serial0", baudrate=19200, timeout=0)
-    printer = ThermalPrinter(uart, auto_warm_up=False, dot_print_s = 0.01, byte_delay_s = 0)
+    printer = ThermalPrinter(uart, 
+                            auto_warm_up=False, 
+                            dot_print_s = 0.01, 
+                            byte_delay_s = 0)
     printer.warm_up()
     printer.print("DUCK is online. Here is the IP address:")
     printer.print(SERVER_IP_ADDRESS)
@@ -65,15 +68,18 @@ def initializePrinter_escpos():
            bytesize=8,
            parity='N',
            stopbits=1,
-           timeout=1.00,
+           timeout=0.01,
            dsrdtr=True)
     return p
 
 def checkPaper():
-    if printer.has_paper():
-        pass
-    else:
-        flash("The printer is out of paper. Tell Mr. Jones to fix it!","error")
+    try:
+        if printer.has_paper():
+            pass
+        else:
+            flash("The printer is out of paper. Tell Mr. Jones to fix it!","error")
+    except:
+        flash("Unable to check paper status","error")
 
 def PrintHallPass(name, destination, date, time, id):
     printer.size = adafruit_thermal_printer.SIZE_MEDIUM
@@ -87,11 +93,11 @@ def PrintHallPass(name, destination, date, time, id):
     printer.print("on " + date)
     printer.feed(1)
     printer.print("Questions? See Mr. Jones")
-    printer.print("in room B130")
+    printer.print("in room C116")
     printer.feed(1)
     printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.print("(scan to validate)")
-    printer_escpos.qr("http://10.39.13.236/view_pass/" + str(id),native=False ,size=8)
+    printer_escpos.qr("https://www.youtube.com/watch?v=dQw4w9WgXcQ" + str(id),native=False ,size=8)
     printer_escpos.text("\n\n\n")
 
 def PrintWPPass(name, date):
@@ -113,14 +119,59 @@ def PrintWPPass(name, date):
     printer.feed(3)
     printer.print(name)
     printer.print("is invited")
-    printer.print("to room B130")
+    printer.print("to room C116")
     printer.print("on")
     printer.print(custom_strftime('%a, %B {S}', date))
     printer.feed(3)
     printer.print("Questions?") 
     printer.print("See Mr. Jones")
-    printer.print("in room B130")
+    printer.print("in room C116")
     printer.feed(2)
+
+
+def PrintInvitation(name, date, period, reason):
+    ###
+    #I got some of this code from stackoverflow
+    #https://stackoverflow.com/questions/5891555/display-the-date-like-may-5th-using-pythons-strftime
+    ###
+    def suffix(d):
+        return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+    def custom_strftime(format, t):
+        return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+
+    printer.size = adafruit_thermal_printer.SIZE_LARGE
+    printer.justify = adafruit_thermal_printer.JUSTIFY_LEFT
+    printer.print("__(.)<INVITATION")
+    printer.print("\___)")
+    printer.justify = adafruit_thermal_printer.JUSTIFY_CENTER
+    printer.feed(2)
+    printer.print(name)
+    printer.print("you are invited")
+    printer.print("to room C116")
+    printer.print("during " + period)
+    printer.print("on")
+    printer.print(custom_strftime('%a, %B {S}', date))
+    printer.print("reason:")
+    printer.size = adafruit_thermal_printer.SIZE_SMALL
+    printer.print(reason)
+    printer.size = adafruit_thermal_printer.SIZE_LARGE
+    printer.feed(2)
+    printer.print("Questions?") 
+    printer.print("See Mr. Jones")
+    printer.print("in room C116")
+    printer.feed(2)
+    printer.size = adafruit_thermal_printer.SIZE_SMALL
+    printer.justify = adafruit_thermal_printer.JUSTIFY_LEFT
+    printer.print("****")
+    printer.print("This invitation only signifies")
+    printer.print("that you are welcome to be in")
+    printer.print("C116 during this period.")
+    printer.print("Your teacher must give")
+    printer.print("permission to leave their")
+    printer.print("classroom.")
+    printer.feed(2)
+
 
 @app.context_processor
 def inject_dict_for_all_templates():
@@ -385,6 +436,19 @@ def request_wp():
         db.session.commit()
         return approve_wp(new_wp_pass_request.id)
         
+@app.route("/request_invite", methods=["GET","POST"])
+def request_invite():
+    #this page for the admin both creates and approves the request
+    if request.method == "GET":
+        checkPaper()
+        return render_template("request_invite.html")
+    elif request.method == "POST":
+        name = request.form.get("name")
+        date = datetime.strptime(request.form.get("date"), '%Y-%m-%d').date()
+        period = request.form.get("period")
+        reason = request.form.get("reason")
+        PrintInvitation(name, date, period, reason)
+        return redirect(url_for("pass_admin"))  
 
 @app.route("/resetdb")
 @login_required

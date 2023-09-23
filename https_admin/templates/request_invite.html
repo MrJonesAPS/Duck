@@ -1,0 +1,23 @@
+{% extends "page.html" %}
+{% block title %}Creating An Auto-Approved Warrior's Period Pass{% endblock %}
+{% block content %}
+<form action="/request_invite" method="post">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name">
+    </div>
+    <div class="form-group">
+      <label for="date">Date</label>
+      <input id="date" class="form-control" name="date" type="date" />
+    </div>
+    <div class="form-group">
+      <label for="period">Period</label>
+      <input id="period" class="form-control" name="period" type="text" />
+    </div>
+    <div class="form-group">
+      <label for="reason">Reason</label>
+      <input id="reason" class="form-control" name="reason" type="text" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit And Print</button>
+</form>
+{% endblock %}
