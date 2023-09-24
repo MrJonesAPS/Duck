@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block title %}Requesting a Hall Pass{% endblock %}
+{% block title %}Requesting a hall pass{% endblock %}
 {% block content %}
 <form action="/request_pass" method="post">
     <div class="form-group">
@@ -10,6 +10,6 @@
         <label for="destination">Destination</label>
         <input type="text" class="form-control" id="destination" name="destination" placeholder="Where are you going?">
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Submit And Print</button>
 </form>
 {% endblock %}

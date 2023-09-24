@@ -1,7 +1,7 @@
 venv/
-http_student/instance/db.sqlite
-http_student/instance/
-https_admin/instance/
-http_student/__pycache__/
-nohup.out
-startBoth.sh
+instance/db.sqlite
+instance/
+__pycache__/
+myenv.sh
+wsgi.py
+duck.sock
