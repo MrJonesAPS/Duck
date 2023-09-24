@@ -194,7 +194,12 @@ def approve_pass(id):
     db.session.commit()
     nowTime = datetime.now().strftime("%I:%M %p")
     nowDate = date.today().strftime("%B %d, %Y")
-    socketio.emit('Pass', {'name': thisPass.name, 'destination': thisPass.destination})
+    socketio.emit('Pass'
+        , {'name': thisPass.name
+            , 'destination': thisPass.destination
+            , 'passID': id
+            }
+        )
     return redirect(url_for("pass_admin"))  
 
 @app.route("/reject_pass/<id>", methods=["GET"])
