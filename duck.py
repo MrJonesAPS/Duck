@@ -25,7 +25,8 @@ import requests
 #configuration
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
-ADMIN_USER_NUM = os.environ.get("ADMIN_USER_NUM", None).strip()
+ADMIN_USER1_NUM = os.environ.get("ADMIN_USER1_NUM", None).strip()
+ADMIN_USER2_NUM = os.environ.get("ADMIN_USER2_NUM", None).strip()
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -296,7 +297,7 @@ def request_pass():
 def admin_request_pass():
     #this page for the admin both creates and approves the request
     if request.method == "GET":
-        return render_template("request_pass.html")
+        return render_template("admin_request_pass.html")
     elif request.method == "POST":
         name = request.form.get("name")
         destination = request.form.get("destination")
@@ -399,7 +400,13 @@ class User(db.Model, UserMixin):
 #########
 #Socket Stuff
 #########
-socketio = SocketIO(app, async_mode='gevent', engineio_logger=True, logger=True, cors_allowed_origins=['https://www.whscs.net','https://whscs.net'])
+socketio = SocketIO(app
+    , async_mode='gevent'
+    , engineio_logger=True
+    , logger=True
+    , cors_allowed_origins=['https://www.whscs.net','https://whscs.net','https://www.duck.whscs.net']
+    #, cors_allowed_origins=['*']
+    )
 
 @socketio.on('connect')
 def test_connect():
