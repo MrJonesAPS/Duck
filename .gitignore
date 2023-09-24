@@ -5,3 +5,5 @@ __pycache__/
 myenv.sh
 wsgi.py
 duck.sock
+nohup.out
+startBoth.sh
