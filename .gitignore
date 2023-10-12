@@ -7,3 +7,5 @@ wsgi.py
 duck.sock
 nohup.out
 startBoth.sh
+client_log.txt
+client-changes.py

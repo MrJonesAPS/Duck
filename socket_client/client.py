@@ -4,11 +4,12 @@ import os
 from escpos.printer import Serial
 import socketio
 from datetime import date, datetime, timedelta
+import time
 
 #Get the system IP address.
 #this doesn't matter for this program, 
 # but it's convenient because I have this setup headless
-SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
+#SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
 
 #Initialize Socket
 sio = socketio.Client()
@@ -21,9 +22,9 @@ def initializePrinter():
                             dot_print_s = 0.01, 
                             byte_delay_s = 0)
     printer.warm_up()
-    printer.print("Here is my IP address:")
-    printer.print(SERVER_IP_ADDRESS)
-    printer.feed(2)
+    #printer.print("Here is my IP address:")
+    #printer.print(SERVER_IP_ADDRESS)
+    #printer.feed(2)
     return printer
 
 def initializePrinter_escpos():
@@ -139,19 +140,19 @@ printer_escpos = initializePrinter_escpos()
 
 @sio.event
 def connect():
-    printer.print("I'm connected!")
-    printer.feed(2)
+    print("I'm connected!")
+    #printer.feed(2)
     #sio.emit('login', {'userKey': 'streaming_api_key'})
 
 @sio.event
 def connect_error():
-    printer.print("The connection failed!")
-    printer.feed(2)
+    print("The connection failed!")
+    #printer.feed(2)
 
 @sio.event
 def message(data):
-    printer.print('I received a message!')
-    printer.feed(2)
+    print('I received a message!')
+    #printer.feed(2)
 
 @sio.on('Pass')
 def PrintHallPass(data):
@@ -178,9 +179,12 @@ def PrintHallPass(data):
     printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.print("(scan to validate)")
     printer_escpos.qr("https://www.duck.whscs.net/view_pass/" + str(passID),native=False ,size=8)
-    printer_escpos.text("\n\n\n")
+    printer_escpos.text("\n\n\n\n\n\n")
 
 
-
-sio.connect('https://www.duck.whscs.net')
-sio.wait()
+while True:
+    try:
+        sio.connect('https://www.duck.whscs.net')
+        sio.wait()
+    except:
+        time.sleep(5)
