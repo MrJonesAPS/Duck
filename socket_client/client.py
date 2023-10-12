@@ -83,7 +83,7 @@ def PrintWPPass(name, date):
 @sio.on('Invitation')
 def PrintInvitation(data):
     name = data.get("name")
-    date = data.get("date")
+    date = datetime.strptime(data.get("date"),'%Y-%m-%d')
     period = data.get("period")
     reason = data.get("reason")
     
@@ -108,7 +108,9 @@ def PrintInvitation(data):
     printer.print("to room C116")
     printer.print("during " + period)
     printer.print("on")
+    printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.print(custom_strftime('%a, %B {S}', date))
+    printer.size = adafruit_thermal_printer.SIZE_LARGE
     printer.print("reason:")
     printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.print(reason)
@@ -127,7 +129,8 @@ def PrintInvitation(data):
     printer.print("Your teacher must give")
     printer.print("permission to leave their")
     printer.print("classroom.")
-    printer.feed(2)
+    printer.print("****")
+    printer_escpos.text("\n\n\n\n\n\n")
 
 
 
