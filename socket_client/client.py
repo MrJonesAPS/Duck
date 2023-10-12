@@ -77,9 +77,15 @@ def PrintWPPass(name, date):
     printer.print("See Mr. Jones")
     printer.print("in room C116")
     printer.feed(2)
+'''
 
-
-def PrintInvitation(name, date, period, reason):
+@sio.on('Invitation')
+def PrintInvitation(data):
+    name = data.get("name")
+    date = data.get("date")
+    period = data.get("period")
+    reason = data.get("reason")
+    
     ###
     #I got some of this code from stackoverflow
     #https://stackoverflow.com/questions/5891555/display-the-date-like-may-5th-using-pythons-strftime
@@ -121,7 +127,7 @@ def PrintInvitation(name, date, period, reason):
     printer.print("permission to leave their")
     printer.print("classroom.")
     printer.feed(2)
-'''
+
 
 
 ###

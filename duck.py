@@ -313,6 +313,28 @@ def admin_request_pass():
         #after you commit, the id is set. I'll use my existing approval code from here
         return approve_pass(new_pass_request.id)  
 
+@app.route("/admin_request_invite", methods=["GET","POST"])
+@login_required
+def admin_request_invite():
+    #this page for the admin both creates and approves the request
+    if request.method == "GET":
+        return render_template("admin_request_invite.html")
+    elif request.method == "POST":
+        name = request.form.get("name")
+        date = request.form.get("date")
+        period = request.form.get("period")
+        reason = request.form.get("reason")
+        #I'm not saving these in the DB for now. Will I regret that?
+
+        socketio.emit('Invitation'
+        , {'name': name
+            , 'date': date
+            , 'period': period
+            , 'reason':reason
+            }
+        )
+        return redirect(url_for("pass_admin"))  
+
 @app.route("/request_wp", methods=["GET","POST"])
 def request_wp():
     if request.method == "GET":
