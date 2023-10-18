@@ -296,7 +296,7 @@ def request_pass():
             or (current_time.hour == 12)
             or (current_time.hour == 13 and (21 <= current_time.minute <= 47))
             or (current_time.hour >=15)):
-            return render_template("ho_hall_pass.html")
+            return render_template("no_hall_pass.html")
         else:
             return render_template("request_pass.html")
     elif request.method == "POST":
