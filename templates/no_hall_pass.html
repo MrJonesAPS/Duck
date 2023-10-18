@@ -1,0 +1,15 @@
+{% extends "page.html" %}
+{% block title %}Requesting a hall pass{% endblock %}
+{% block content %}
+<pre>
+    <code>
+        if(class time in ['first ten minutes','last ten minutes']):
+            if(not its_an_emergency):
+                print("Sorry! No passes right now. Refresh this page in a bit.")
+            else:
+                print("Go talk to Mr. Jones")  
+    </code>
+</pre>
+Sorry, no hall passes during the first or last 10 minutes of class. 
+Refresh this page in a bit, and if this is an emergency let Mr. Jones know!
+{% endblock %}

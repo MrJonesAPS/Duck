@@ -286,7 +286,19 @@ def view_pass(id):
 @app.route("/request_pass", methods=["GET","POST"])
 def request_pass():
     if request.method == "GET":
-        return render_template("request_pass.html")
+        #hide this menu during the first/last 10 mins of class
+        current_time = datetime.now()
+        if((current_time.hour < 8)
+            or (current_time.hour == 8 and current_time.minute <= 30)
+            or (current_time.hour == 9 and 45 <= current_time.minute)
+            or (current_time.hour == 10 and current_time.minute <= 11)
+            or (current_time.hour == 11 and (3 <= current_time.minute <= 28))
+            or (current_time.hour == 12)
+            or (current_time.hour == 13 and (21 <= current_time.minute <= 47))
+            or (current_time.hour >=15)):
+            return render_template("ho_hall_pass.html")
+        else:
+            return render_template("request_pass.html")
     elif request.method == "POST":
         name = request.form.get("name")
         destination = request.form.get("destination")
