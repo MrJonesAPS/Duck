@@ -185,6 +185,22 @@ def pass_admin():
                                str = str
                                )
 
+@app.route("/pass_history", methods=["GET"])
+@login_required
+def pass_history():
+    if request.method == "GET":
+        old_passes = db.session.execute(db.select(HallPass).\
+                                               filter(HallPass.approved_datetime != None,
+                                                      HallPass.rejected.is_(False))).scalars()
+
+        return render_template("pass_history.html",
+                               old_passes = old_passes,
+                               current_user=current_user,
+                               now = datetime.now,
+                               int = int,
+                               str = str
+                               )
+
 @app.route("/approve_pass/<id>", methods=["GET"])
 @login_required
 def approve_pass(id):
@@ -393,8 +409,10 @@ def resetdb():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        adminUser = User(id=ADMIN_USER_NUM,name="Admin")
-        db.session.add(adminUser)
+        adminUser1 = User(id=ADMIN_USER1_NUM,name="Admin")
+        db.session.add(adminUser1)
+        adminUser1 = User(id=ADMIN_USER1_NUM,name="Admin")
+        db.session.add(adminUser1)
         db.session.commit()
         flash("The DB was just reset","error")
         return redirect(url_for("home"))

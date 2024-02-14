@@ -1,0 +1,31 @@
+{% extends "page.html" %}
+{% block title %}Hall Pass History{% endblock %}
+{% block headStuff %}
+<meta http-equiv="refresh" content="10">
+{% endblock %}
+{% block content %}
+<main>
+    <h1>Old Hall Passes:</h1>
+    <p class="fs-5 col-md-8">
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Destination</th>
+            <th>Date</th>
+            <th>Time Out</th>
+        </tr>
+
+        {% for pass in old_passes %}
+        <tr> 
+            <td>{{ pass.name }}</td>
+            <td>{{ pass.destination }}</td>
+            <td>{{ pass.approved_datetime }}</td>
+            <td>
+                {{ str(int(((pass.back_datetime - pass.approved_datetime).total_seconds())//60)) + " mins" }} 
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</main>
+
+{% endblock %}
