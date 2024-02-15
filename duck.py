@@ -189,9 +189,10 @@ def pass_admin():
 @login_required
 def pass_history():
     if request.method == "GET":
-        old_passes = db.session.execute(db.select(HallPass).\
+        old_passes = db.paginate(db.select(HallPass).\
                                                filter(HallPass.approved_datetime != None,
-                                                      HallPass.rejected.is_(False))).scalars()
+                                                      HallPass.rejected.is_(False))
+                                                      .order_by(HallPass.approved_datetime.desc()))
 
         return render_template("pass_history.html",
                                old_passes = old_passes,

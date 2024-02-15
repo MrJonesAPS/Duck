@@ -37,50 +37,46 @@
                     </li>
                     -->
                     {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pass_admin">Pass Admin</a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Manually Create Pass
+                          Admin
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li class="dropdown-item">
-                                <a class="nav-link" href="/admin_request_pass">Hall</a>
+                                <a class="nav-link" href="/pass_admin">Pass Admin</a>
                             </li>
                             <li class="dropdown-item">
-                                <a class="nav-link" href="/admin_request_wp">WP</a>
+                                <a class="nav-link" href="/admin_request_pass">Manuall Hall Pass</a>
                             </li>
                             <li class="dropdown-item">
                                 <a class="nav-link" href="/admin_request_invite">Invitation</a>
                             </li>
+                            <li class="dropdown-item">
+                                <a class="nav-link" href="/pass_history">History</a>
+                            </li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/summary">Print Daily Summary</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/resetdb">Truncate DB</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          DB Tools
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li class="dropdown-item">
+                                <a class="nav-link" href="/summary">Print Daily Summary</a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a class="nav-link" href="/resetdb">Truncate DB</a>
+                            </li>
+                        </ul>
                     </li>
                     <form class="form-inline" action="/logout">
                        <button class="btn btn-sm btn-outline-secondary">Logout</a> 
                     </form>
                     {% else %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Request Pass
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li class="dropdown-item">
-                                <a class="nav-link" href="/request_pass">Hall</a>
-                            </li>
-                            <li class="dropdown-item">
-                                <a class="nav-link" href="/request_wp">WP</a>
-                            </li>
-                        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/request_pass">Hall Pass</a>
                     </li>
                     <li class="nav-item">
-                        
                         <a class="nav-link" href="/login">Admin Login</a>
                     </li>
                     {% endif %}
