@@ -191,6 +191,7 @@ def pass_history():
     if request.method == "GET":
         old_passes = db.paginate(db.select(HallPass).\
                                                filter(HallPass.approved_datetime != None,
+                                                    HallPass.back_datetime != None,
                                                       HallPass.rejected.is_(False))
                                                       .order_by(HallPass.approved_datetime.desc()))
 
@@ -260,12 +261,23 @@ def reject_wp(id):
     db.session.commit()
     return redirect(url_for("pass_admin"))  
 
+@app.route("/return_pass/<id>/<when>", methods=["GET"])
 @app.route("/return_pass/<id>", methods=["GET"])
 @login_required
-def return_pass(id):
+def return_pass(id, when="now"):
     print("returning pass",id)
     thisPass = db.session.execute(db.select(HallPass).filter_by(id=id)).scalar_one()
-    thisPass.back_datetime = datetime.now()
+    
+    ##
+    #Placeholder logic. I often have students come back and I don't press the button until a little later
+    #For now, if I don't press "now", the default will set their return time to the same as their leave time.
+    #The goal here is that when I query students who were gone a long time, 
+    #I'll be confident I don't have false positives
+    ##
+    if when == "now":
+        thisPass.back_datetime = datetime.now()
+    else:
+        thisPass.back_datetime = thisPass.approved_datetime
     db.session.commit()
     return redirect(url_for("pass_admin"))  
 
@@ -335,6 +347,8 @@ def admin_request_pass():
     elif request.method == "POST":
         name = request.form.get("name")
         destination = request.form.get("destination")
+        if destination=='':
+            destination = 'Restroom'
         request_datetime = datetime.now()
         new_pass_request = HallPass(name=name, destination=destination,request_datetime=request_datetime,rejected=False)
         db.session.add(new_pass_request)

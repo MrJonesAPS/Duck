@@ -15,120 +15,146 @@
             <th>Deny</th>
         </tr>
 
-    
-           
-            {% for pass in new_pass_requests %}
-            
-        
-           <tr> 
+
+
+        {% for pass in new_pass_requests %}
+
+
+        <tr>
             <td>{{ pass.name }}</td>
             <td>{{ pass.destination }}</td>
             <td>
                 <form class="form-inline" action="/approve_pass/{{pass.id}}">
-                    <button class="btn btn-sm btn-outline-secondary">Approve</a> 
+                    <button class="btn btn-lg btn-outline-secondary">Approve</a>
                 </form>
             </td>
             <td>
                 <form class="form-inline" action="/reject_pass/{{pass.id}}">
-                    <button class="btn btn-sm btn-outline-secondary">Reject</a> 
+                    <button class="btn btn-lg btn-outline-secondary">Reject</a>
                 </form>
             </td>
         </tr>
-        
-            {% endfor %}
-        </table>
 
+        {% endfor %}
+    </table>
+
+    <!--
     <h1>New WP Requests:</h1>
     <p class="fs-5 col-md-8">
-        <table class="table">
-            <tr>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Approve</th>
-                <th>Deny</th>
-            </tr>
-         
-            {% for pass in new_WP_requests %}
-            
-        
-           <tr> 
-            <td>{{ pass.name  }} </td>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Approve</th>
+            <th>Deny</th>
+        </tr>
+
+        {% for pass in new_WP_requests %}
+
+
+        <tr>
+            <td>{{ pass.name }} </td>
             <td>{{ pass.date }} </td>
             <td>
-            <form class="form-inline" action="/approve_wp/{{pass.id}}">
-                <button class="btn btn-sm btn-outline-secondary">Approve</a> 
-            </form>
-        </td>
-        <td>
-            <form class="form-inline" action="/reject_wp/{{pass.id}}">
-                <button class="btn btn-sm btn-outline-secondary">Reject</a> 
-            </form>
-        </td>
-            
+                <form class="form-inline" action="/approve_wp/{{pass.id}}">
+                    <button class="btn btn-lg btn-outline-secondary">Approve</a>
+                </form>
+            </td>
+            <td>
+                <form class="form-inline" action="/reject_wp/{{pass.id}}">
+                    <button class="btn btn-lg btn-outline-secondary">Reject</a>
+                </form>
+            </td>
+
         </tr>
-        
-            {% endfor %}
-        </table>
-            
+
+        {% endfor %}
+    </table>
+    -->
 
     </p>
 
     <h1>Approved Requests:</h1>
     <p class="fs-5 col-md-8">
-        <ol>   
-            {% for pass in approved_passes %}
-            
-        
-           <li> 
-            {{ pass.name + " " + pass.destination + " (" + str(int(((now() - pass.approved_datetime).total_seconds())//60)) + " mins)" }} 
-           </br>
-            <form class="form-inline" action="/return_pass/{{pass.id}}">
-                <button class="btn btn-sm btn-outline-secondary">Back</a> 
-            </form>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Destination</th>
+            <th>Time Out</th>
+            <th>Back Now</th>
+            <th>Back A While Ago</th>
+            <th>Reprint</th>
+            <th>View</th>
+        </tr>
 
-            <form class="form-inline" action="/approve_pass/{{pass.id}}">
-                <button class="btn btn-sm btn-outline-secondary">Reprint</a> 
-            </form>
+        {% for pass in approved_passes %}
 
-            <form class="form-inline" action="/view_pass/{{pass.id}}">
-                <button class="btn btn-sm btn-outline-secondary">View</a> 
-            </form>
-           
-            </li>
-        
-            {% endfor %}
-        </ol>
-    
+
+        <tr>
+            <td>
+                {{ pass.name }}
+            </td>
+            <td>
+                {{ pass.destination }}
+            </td>
+            <td>
+                {{str(int(((now() - pass.approved_datetime).total_seconds())//60)) + " mins" }}
+            </td>
+            <td>
+                <form class="form-inline" action="/return_pass/{{pass.id}}">
+                    <button class="btn btn-lg btn-outline-secondary">Back Now</a>
+                </form>
+            </td>
+            <td>
+                <form class="form-inline" action="/return_pass/{{pass.id}}/past">
+                    <button class="btn btn-lg btn-outline-secondary">Back A While Ago</a>
+                </form>
+            </td>
+            <td>
+                <form class="form-inline" action="/approve_pass/{{pass.id}}">
+                    <button class="btn btn-lg btn-outline-secondary">Reprint</a>
+                </form>
+            </td>
+            <td>
+                <form class="form-inline" action="/view_pass/{{pass.id}}">
+                    <button class="btn btn-lg btn-outline-secondary">View</a>
+                </form>
+            </td>
+        </tr>
+
+        {% endfor %}
+    </table>
+
     </p>
-
+    <!--
     <h1>Approved WP Passes:</h1>
     <p class="fs-5 col-md-8">
-        <ol>   
-            {% for pass in approved_WP %}
-            
-        
-           <li> 
-            {{ pass.name }} | {{pass.date }} 
-            
+    <ol>
+        {% for pass in approved_WP %}
+
+
+        <li>
+            {{ pass.name }} | {{pass.date }}
+
 
 
             <form class="form-inline" action="/approve_wp/{{pass.id}}">
-                <button class="btn btn-sm btn-outline-secondary">Reprint</a> 
+                <button class="btn btn-sm btn-outline-secondary">Reprint</a>
             </form>
-           
-            </li>
-        
-            {% endfor %}
-        </ol>
-    
+
+        </li>
+
+        {% endfor %}
+    </ol>
+    -->
     </p>
 
 
 
-    
+
 </main>
-{% if should_we_quack  %}
+{% if should_we_quack %}
 <!--Sound Effect by <a href="https://pixabay.com/users/iedurodrigues-27915902/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=112941">iedurodrigues</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=112941">Pixabay</a>-->
-<embed src="/static/brand/duck-quack-112941.mp3" controller="true" autoplay="true" autostart="True" type="audio/mp3"/>
+<embed src="/static/brand/duck-quack-112941.mp3" controller="true" autoplay="true" autostart="True" type="audio/mp3" />
 {% endif %}
 {% endblock %}
