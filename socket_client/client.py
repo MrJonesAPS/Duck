@@ -170,8 +170,8 @@ def PrintIPAddress():
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
 
-    print("Your Computer Name is:" + hostname)
-    print("Your Computer IP Address is:" + IPAddr)
+    printer.print("Your Computer Name is:" + hostname)
+    printer.print("Your Computer IP Address is:" + IPAddr)
     printer.feed(2)
 
 @sio.on('Pass')
