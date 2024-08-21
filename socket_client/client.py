@@ -3,6 +3,7 @@ import serial
 import os
 from escpos.printer import Serial
 import socketio
+import socket
 from datetime import date, datetime, timedelta
 import time
 
@@ -165,9 +166,12 @@ def PrintIPAddress():
     # but it's convenient because I have this setup headless
     #this used to run every time the printer started up. Instead, I'll put this in a function
     #and add a button to the admin dashboard
-    SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
-    printer.print("Here is my IP address:")
-    printer.print(SERVER_IP_ADDRESS)
+    #SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+
+    print("Your Computer Name is:" + hostname)
+    print("Your Computer IP Address is:" + IPAddr)
     printer.feed(2)
 
 @sio.on('Pass')

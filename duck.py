@@ -223,6 +223,7 @@ def approve_pass(id):
 @app.route("/print_ip", methods=["GET"])
 @login_required
 def print_ip():
+    socketio.emit('IP')
     return redirect(url_for("pass_admin")) 
  
 
