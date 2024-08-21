@@ -218,7 +218,13 @@ def approve_pass(id):
             , 'passID': id
             }
         )
-    return redirect(url_for("pass_admin"))  
+    return redirect(url_for("pass_admin")) 
+
+@app.route("/print_ip", methods=["GET"])
+@login_required
+def print_ip():
+    return redirect(url_for("pass_admin")) 
+ 
 
 @app.route("/reject_pass/<id>", methods=["GET"])
 @login_required
