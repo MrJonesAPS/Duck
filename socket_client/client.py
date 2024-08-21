@@ -11,10 +11,7 @@ import time
 teacher = "Mr. Jones"
 room = "511"
 
-#Get the system IP address.
-#this doesn't matter for this program, 
-# but it's convenient because I have this setup headless
-#SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
+
 
 #Initialize Socket
 sio = socketio.Client()
@@ -27,9 +24,7 @@ def initializePrinter():
                             dot_print_s = 0.01, 
                             byte_delay_s = 0)
     printer.warm_up()
-    #printer.print("Here is my IP address:")
-    #printer.print(SERVER_IP_ADDRESS)
-    #printer.feed(2)
+
     return printer
 
 def initializePrinter_escpos():
@@ -161,6 +156,19 @@ def connect_error():
 def message(data):
     print('I received a message!')
     #printer.feed(2)
+
+
+@sio.on('IP')
+def PrintIPAddress():
+    #Get the system IP address.
+    #this doesn't matter for this program, 
+    # but it's convenient because I have this setup headless
+    #this used to run every time the printer started up. Instead, I'll put this in a function
+    #and add a button to the admin dashboard
+    SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
+    printer.print("Here is my IP address:")
+    printer.print(SERVER_IP_ADDRESS)
+    printer.feed(2)
 
 @sio.on('Pass')
 def PrintHallPass(data):
