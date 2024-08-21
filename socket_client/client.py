@@ -6,6 +6,11 @@ import socketio
 from datetime import date, datetime, timedelta
 import time
 
+
+#Change this to use for a different teacher/room
+teacher = "Mr. Jones"
+room = "511"
+
 #Get the system IP address.
 #this doesn't matter for this program, 
 # but it's convenient because I have this setup headless
@@ -45,7 +50,7 @@ def checkPaper():
         if printer.has_paper():
             pass
         else:
-            flash("The printer is out of paper. Tell Mr. Jones to fix it!","error")
+            flash(f"The printer is out of paper. Tell {teacher} to fix it!","error")
     except:
         flash("Unable to check paper status","error")
 '''
@@ -70,13 +75,13 @@ def PrintWPPass(name, date):
     printer.feed(3)
     printer.print(name)
     printer.print("is invited")
-    printer.print("to room C116")
+    printer.print(f"to room {room}")
     printer.print("on")
     printer.print(custom_strftime('%a, %B {S}', date))
     printer.feed(3)
     printer.print("Questions?") 
-    printer.print("See Mr. Jones")
-    printer.print("in room C116")
+    printer.print(f"See {teacher}")
+    printer.print(f"in room {room}")
     printer.feed(2)
 '''
 
@@ -105,7 +110,7 @@ def PrintInvitation(data):
     printer.feed(2)
     printer.print(name)
     printer.print("you are invited")
-    printer.print("to room C116")
+    printer.print(f"to room {room}")
     printer.print("during " + period)
     printer.print("on")
     printer.size = adafruit_thermal_printer.SIZE_SMALL
@@ -117,8 +122,8 @@ def PrintInvitation(data):
     printer.size = adafruit_thermal_printer.SIZE_LARGE
     printer.feed(2)
     printer.print("Questions?") 
-    printer.print("See Mr. Jones")
-    printer.print("in room C116")
+    printer.print(f"See {teacher}")
+    printer.print(f"in room {room}")
     printer.feed(2)
     printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.justify = adafruit_thermal_printer.JUSTIFY_LEFT
@@ -176,8 +181,8 @@ def PrintHallPass(data):
     printer.print("at " + nowTime)
     printer.print("on " + nowDate)
     printer.feed(1)
-    printer.print("Questions? See Mr. Jones")
-    printer.print("in room C116")
+    printer.print(f"Questions? See {teacher}")
+    printer.print(f"in room {room}")
     printer.feed(1)
     printer.size = adafruit_thermal_printer.SIZE_SMALL
     printer.print("(scan to validate)")
