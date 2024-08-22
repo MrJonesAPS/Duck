@@ -167,11 +167,8 @@ def PrintIPAddress():
     #this used to run every time the printer started up. Instead, I'll put this in a function
     #and add a button to the admin dashboard
     #SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
-    hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
 
-    printer.print("Your Computer Name is:" + hostname)
-    printer.print("Your Computer IP Address is:" + IPAddr)
+    printer.print(os.system('ifconfig'))
     printer.feed(2)
 
 @sio.on('Pass')
