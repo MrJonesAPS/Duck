@@ -168,7 +168,7 @@ def PrintIPAddress():
     #and add a button to the admin dashboard
     #SERVER_IP_ADDRESS = os.environ.get("IP", None).strip()
 
-    printer.print(os.system('ifconfig'))
+    printer.print(os.popen('ifconfig').read())
     printer.feed(2)
 
 @sio.on('Pass')
