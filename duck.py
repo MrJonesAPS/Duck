@@ -322,8 +322,11 @@ def view_pass(id):
 @app.route("/request_pass", methods=["GET","POST"])
 def request_pass():
     if request.method == "GET":
+        '''This code handled Wakefield's rule about first/last 10 minutes.
+            disabling it because ACC doesn't seem to have that rule.
         #hide this menu during the first/last 10 mins of class
         current_time = datetime.now()
+        
         if((current_time.hour < 8)
             or (current_time.hour == 8 and current_time.minute <= 30)
             or (current_time.hour == 9 and 45 <= current_time.minute)
@@ -335,14 +338,34 @@ def request_pass():
             return render_template("no_hall_pass.html")
         else:
             return render_template("request_pass.html")
+        '''
+        return render_template("request_pass.html")
     elif request.method == "POST":
         name = request.form.get("name")
         destination = request.form.get("destination")
         request_datetime = datetime.now()
-        new_pass_request = HallPass(name=name, destination=destination,request_datetime=request_datetime,rejected=False)
-        db.session.add(new_pass_request)
-        db.session.commit()
-        flash("Hi " + name + " your pass for " + destination + " has been created. You can now ask Mr Jones to approve it")
+        
+        auto_approve = True
+
+        if auto_approve:
+            new_pass_request = HallPass(name=name, destination=destination,request_datetime=request_datetime,approved_datetime=request_datetime,rejected=False)
+            db.session.add(new_pass_request)
+            db.session.commit()
+
+            socketio.emit('Pass'
+            , {'name': name
+                , 'destination': destination
+                , 'passID': new_pass_request.id
+                }
+            )
+            flash("Hi " + name + " your pass for " + destination + " has been auto-approved. You can pick it up at the printer.")
+        else:
+            new_pass_request = HallPass(name=name, destination=destination,request_datetime=request_datetime,rejected=False)
+            db.session.add(new_pass_request)
+            db.session.commit()
+
+            flash("Hi " + name + " your pass for " + destination + " has been requested. The teacher will approve it.")
+            
         return redirect(url_for("home"))  
 
 @app.route("/admin_request_pass", methods=["GET","POST"])
